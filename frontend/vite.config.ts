@@ -2,9 +2,9 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// https://vitejs.dev/config/
+// Configuración específica para GitHub Pages
 export default defineConfig({
-  base: process.env.NODE_ENV === 'production' ? '/' : '/',
+  base: '/TDAH-DASHBOARD/', // Importante para GitHub Pages
   plugins: [
     react(),
     VitePWA({
@@ -18,8 +18,8 @@ export default defineConfig({
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',
-        scope: '/',
-        start_url: '/',
+        scope: '/TDAH-DASHBOARD/',
+        start_url: '/TDAH-DASHBOARD/',
         icons: [
           {
             src: 'pwa-64x64.png',
@@ -44,74 +44,11 @@ export default defineConfig({
             purpose: 'maskable'
           }
         ]
-      },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
-              }
-            }
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'gstatic-fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
-              }
-            }
-          },
-          {
-            urlPattern: /\/api\/.*/i,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-cache',
-              expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 // 24 hours
-              },
-              networkTimeoutSeconds: 10
-            }
-          }
-        ]
       }
     })
   ],
-  server: {
-    port: 3000,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3001',
-        changeOrigin: true
-      }
-    }
-  },
   build: {
     outDir: 'dist',
-    sourcemap: true,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: ['lucide-react', 'react-aria', 'react-aria-components'],
-          utils: ['date-fns', 'zustand', 'clsx', 'tailwind-merge']
-        }
-      }
-    }
-  },
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts'],
-    css: true
+    sourcemap: false // Desactivado para GitHub Pages
   }
 })
