@@ -95,4 +95,4 @@ docker-compose.override.yml
 # Misc
 *.bak
 *.tmp
-*.temp
+*.temp/dist/

@@ -38,6 +38,8 @@ jobs:
           cd frontend
           cp vite.config.github.ts vite.config.ts
           npm run build
+          # Copiar a raíz para GitHub Pages
+          cp -r dist ../
       
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -45,7 +47,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'frontend/dist'
+          path: 'dist'
 
   deploy:
     environment:
