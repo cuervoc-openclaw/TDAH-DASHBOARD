@@ -4,6 +4,7 @@ import helmet from 'helmet'
 import rateLimit from 'express-rate-limit'
 import dotenv from 'dotenv'
 import { PrismaClient } from '@prisma/client'
+import { initializeDatabase, checkDatabaseHealth } from './config/database'
 
 // Load environment variables
 dotenv.config()
@@ -19,7 +20,29 @@ import { errorHandler } from './middlewares/errorHandler'
 import { authenticate } from './middlewares/auth'
 
 // Initialize Prisma Client
-export const prisma = new PrismaClient()
+export let prisma: PrismaClient
+
+// Initialize database
+const initDatabase = async () => {
+  try {
+    prisma = await initializeDatabase()
+    console.log('✅ Database initialized successfully')
+  } catch (error) {
+    console.error('❌ Failed to initialize database:', error)
+    // Fallback to in-memory SQLite for Vercel
+    prisma = new PrismaClient({
+      datasources: {
+        db: {
+          url: 'file:memory:?cache=shared'
+        }
+      }
+    })
+    console.log('🔄 Using in-memory SQLite as fallback')
+  }
+}
+
+// Initialize database on startup
+initDatabase()
 
 // Create Express app
 const app = express()
@@ -64,12 +87,42 @@ app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
 // Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    service: 'NeuroAsistente TDAH API',
-    version: '0.1.0'
+app.get('/health', async (req, res) => {
+  try {
+    const dbHealth = await checkDatabaseHealth()
+    
+    res.json({ 
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      service: 'NeuroAsistente TDAH API',
+      version: '1.0.0',
+      environment: process.env.NODE_ENV || 'development',
+      database: dbHealth,
+      uptime: process.uptime()
+    })
+  } catch (error) {
+    res.status(500).json({
+      status: 'unhealthy',
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    })
+  }
+})
+
+// Demo endpoint for Vercel
+app.get('/api/demo', (req, res) => {
+  res.json({
+    message: '¡NeuroAsistente TDAH funcionando en Vercel!',
+    features: [
+      'Autenticación JWT',
+      'Gestión de tareas',
+      'Seguimiento de hábitos',
+      'Temporizador Pomodoro',
+      'PWA instalable'
+    ],
+    docs: 'https://github.com/cuervoc-openclaw/TDAH-DASHBOARD',
+    deploy: 'Vercel + GitHub Actions',
+    timestamp: new Date().toISOString()
   })
 })
 
