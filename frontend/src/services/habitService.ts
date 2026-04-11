@@ -134,7 +134,7 @@ class HabitService {
     return streak
   }
 
-  calculateCompletionRate(tracking: HabitTracking[], frequency: string): number {
+  calculateCompletionRate(tracking: HabitTracking[]): number {
     if (tracking.length === 0) return 0
     
     const completed = tracking.filter(t => t.completed).length

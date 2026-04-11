@@ -1,10 +1,5 @@
 import { useState } from 'react'
-import { 
-  Settings as SettingsIcon, Moon, Sun, Contrast, 
-  Bell, Clock, Palette, User, Shield, Download, 
-  Trash2, LogOut, Save, Eye, EyeOff, Volume2,
-  Smartphone, Mail, MessageSquare
-} from 'lucide-react'
+import { Moon, Sun, Contrast, Bell, Clock, Palette, User, Shield, Download, Trash2, LogOut, Save } from 'lucide-react'
 import { useThemeStore } from '../stores/themeStore'
 import { useAuthStore } from '../stores/authStore'
 import { toast } from 'sonner'
@@ -31,15 +26,6 @@ const SettingsPage = () => {
     autoStartBreaks: true,
     autoStartPomodoros: false,
     soundEnabled: true
-  })
-  
-  const [accountSettings, setAccountSettings] = useState({
-    name: 'David Salas',
-    email: 'david@ejemplo.com',
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
-    showPassword: false
   })
 
   const handleSaveSettings = () => {
@@ -268,62 +254,6 @@ const SettingsPage = () => {
                       />
                     </button>
                   </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-success-100 dark:bg-success-900 text-success-600 dark:text-success-400">
-                        <Mail className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <div className="font-medium text-neutral-900 dark:text-neutral-100">
-                          Correo electrónico
-                        </div>
-                        <div className="text-sm text-neutral-600 dark:text-neutral-400">
-                          Resúmenes diarios y recordatorios
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setNotifications(prev => ({ ...prev, email: !prev.email }))}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        notifications.email ? 'bg-success-600' : 'bg-neutral-300 dark:bg-neutral-600'
-                      }`}
-                    >
-                      <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          notifications.email ? 'translate-x-6' : 'translate-x-1'
-                        }`}
-                      />
-                    </button>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-warning-100 dark:bg-warning-900 text-warning-600 dark:text-warning-400">
-                        <MessageSquare className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <div className="font-medium text-neutral-900 dark:text-neutral-100">
-                          WhatsApp
-                        </div>
-                        <div className="text-sm text-neutral-600 dark:text-neutral-400">
-                          Recordatorios instantáneos
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setNotifications(prev => ({ ...prev, whatsapp: !prev.whatsapp }))}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        notifications.whatsapp ? 'bg-warning-600' : 'bg-neutral-300 dark:bg-neutral-600'
-                      }`}
-                    >
-                      <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          notifications.whatsapp ? 'translate-x-6' : 'translate-x-1'
-                        }`}
-                      />
-                    </button>
-                  </div>
                 </div>
               </div>
 
@@ -433,16 +363,128 @@ const SettingsPage = () => {
                       </span>
                     </div>
                   </div>
+                </div>
+              </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                      Tiempo de descanso largo (minutos)
-                    </label>
-                    <div className="flex items-center gap-4">
-                      <input
-                        type="range"
-                        min="10"
-                        max="30"
-                        step="5"
-                        value={pomodoroSettings.longBreakDuration}
-                        onChange={(e) => setPomodoroSettings(prev => ({ ...prev, longBreakDuration
+              <div>
+                <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-4">
+                  Comportamiento
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-neutral-900 dark:text-neutral-100">
+                        Iniciar descansos automáticamente
+                      </div>
+                      <div className="text-sm text-neutral-600 dark:text-neutral-400">
+                        Comienza el descanso al terminar el trabajo
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setPomodoroSettings(prev => ({ ...prev, autoStartBreaks: !prev.autoStartBreaks }))}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        pomodoroSettings.autoStartBreaks ? 'bg-primary-600' : 'bg-neutral-300 dark:bg-neutral-600'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          pomodoroSettings.autoStartBreaks ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-neutral-900 dark:text-neutral-100">
+                        Sonido de notificaciones
+                      </div>
+                      <div className="text-sm text-neutral-600 dark:text-neutral-400">
+                        Reproducir sonido al cambiar sesiones
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setPomodoroSettings(prev => ({ ...prev, soundEnabled: !prev.soundEnabled }))}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        pomodoroSettings.soundEnabled ? 'bg-primary-600' : 'bg-neutral-300 dark:bg-neutral-600'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          pomodoroSettings.soundEnabled ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Account Settings */}
+          {activeTab === 'account' && (
+            <div className="card p-6 space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-4">
+                  Sesión
+                </h3>
+                <div className="space-y-4">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full btn btn-secondary"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Cerrar sesión
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Data Settings */}
+          {activeTab === 'data' && (
+            <div className="card p-6 space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-4">
+                  Exportar datos
+                </h3>
+                <div className="space-y-4">
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                    Descarga todos tus datos en formato JSON para respaldo o migración.
+                  </p>
+                  <button
+                    onClick={handleExportData}
+                    className="btn btn-primary"
+                  >
+                    <Download className="w-4 h-4" />
+                    Exportar todos los datos
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-4">
+                  Eliminar cuenta
+                </h3>
+                <div className="space-y-4">
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                    Esta acción eliminará permanentemente todos tus datos y no se puede deshacer.
+                  </p>
+                  <button
+                    onClick={handleDeleteAccount}
+                    className="btn btn-danger"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Eliminar mi cuenta
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default SettingsPage

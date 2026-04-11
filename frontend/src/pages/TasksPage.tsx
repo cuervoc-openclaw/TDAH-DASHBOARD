@@ -1,45 +1,14 @@
 import { useState, useEffect } from 'react'
-import { 
-  Plus, Search, Filter, Calendar, Tag, Flag, MoreVertical, 
-  CheckCircle, Clock, AlertCircle, Edit, Trash2, ChevronDown,
-  List, Grid, SortAsc, X
-} from 'lucide-react'
-import { useTaskStore, Task } from '../stores/taskStore'
+import { Plus, Search, CheckCircle, Clock, AlertCircle, Trash2 } from 'lucide-react'
+import { useTaskStore } from '../stores/taskStore'
 import { toast } from 'sonner'
-import { format, isToday, isTomorrow, isPast, parseISO } from 'date-fns'
-import { es } from 'date-fns/locale'
 
 const TasksPage = () => {
-  const { 
-    tasks, 
-    filteredTasks, 
-    fetchTasks, 
-    createTask, 
-    updateTask, 
-    deleteTask,
-    setFilters,
-    clearFilters,
-    filters
-  } = useTaskStore()
-  
+  const { tasks, fetchTasks, createTask, updateTask, deleteTask } = useTaskStore()
   const [isAddingTask, setIsAddingTask] = useState(false)
-  const [isEditingTask, setIsEditingTask] = useState<Task | null>(null)
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
-  const [sortBy, setSortBy] = useState<'dueDate' | 'priority' | 'createdAt'>('dueDate')
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
-  const [showFilters, setShowFilters] = useState(false)
-  
-  const [newTask, setNewTask] = useState({
-    title: '',
-    description: '',
-    priority: 2 as 1 | 2 | 3,
-    dueDate: '',
-    tags: [] as string[],
-    category: '',
-    estimatedDuration: ''
-  })
-  
-  const [newTag, setNewTag] = useState('')
+  const [newTask, setNewTask] = useState({ title: '', description: '', priority: 2 as 1 | 2 | 3 })
+  const [search, setSearch] = useState('')
+  const [filter, setFilter] = useState('all')
 
   useEffect(() => {
     fetchTasks()
@@ -58,14 +27,11 @@ const TasksPage = () => {
         priority: newTask.priority,
         status: 'pending',
         isChunked: false,
-        tags: newTask.tags,
-        category: newTask.category || undefined,
-        estimatedDuration: newTask.estimatedDuration ? parseInt(newTask.estimatedDuration) : undefined,
-        dueDate: newTask.dueDate || new Date().toISOString(),
+        tags: [],
         timeSpent: 0
       })
       
-      resetForm()
+      setNewTask({ title: '', description: '', priority: 2 })
       setIsAddingTask(false)
       toast.success('Tarea creada exitosamente')
     } catch (error) {
@@ -73,25 +39,12 @@ const TasksPage = () => {
     }
   }
 
-  const handleEditTask = async () => {
-    if (!isEditingTask || !newTask.title.trim()) return
-
+  const handleCompleteTask = async (taskId: string) => {
     try {
-      await updateTask(isEditingTask.id, {
-        title: newTask.title,
-        description: newTask.description,
-        priority: newTask.priority,
-        tags: newTask.tags,
-        category: newTask.category || undefined,
-        estimatedDuration: newTask.estimatedDuration ? parseInt(newTask.estimatedDuration) : undefined,
-        dueDate: newTask.dueDate || undefined
-      })
-      
-      resetForm()
-      setIsEditingTask(null)
-      toast.success('Tarea actualizada exitosamente')
+      await updateTask(taskId, { status: 'completed' })
+      toast.success('¡Tarea completada!')
     } catch (error) {
-      toast.error('Error al actualizar tarea')
+      toast.error('Error al completar tarea')
     }
   }
 
@@ -106,139 +59,23 @@ const TasksPage = () => {
     }
   }
 
-  const handleCompleteTask = async (taskId: string) => {
-    try {
-      await updateTask(taskId, { status: 'completed' })
-      toast.success('¡Tarea completada!')
-    } catch (error) {
-      toast.error('Error al completar tarea')
-    }
-  }
-
-  const handleStartTask = async (taskId: string) => {
-    try {
-      await updateTask(taskId, { status: 'in-progress' })
-      toast.success('Tarea iniciada')
-    } catch (error) {
-      toast.error('Error al iniciar tarea')
-    }
-  }
-
-  const resetForm = () => {
-    setNewTask({
-      title: '',
-      description: '',
-      priority: 2,
-      dueDate: '',
-      tags: [],
-      category: '',
-      estimatedDuration: ''
-    })
-    setNewTag('')
-  }
-
-  const addTag = () => {
-    if (newTag.trim() && !newTask.tags.includes(newTag.trim())) {
-      setNewTask(prev => ({
-        ...prev,
-        tags: [...prev.tags, newTag.trim()]
-      }))
-      setNewTag('')
-    }
-  }
-
-  const removeTag = (tagToRemove: string) => {
-    setNewTask(prev => ({
-      ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
-    }))
-  }
-
-  const handleEditClick = (task: Task) => {
-    setIsEditingTask(task)
-    setNewTask({
-      title: task.title,
-      description: task.description || '',
-      priority: task.priority,
-      dueDate: task.dueDate ? format(parseISO(task.dueDate), 'yyyy-MM-dd') : '',
-      tags: task.tags,
-      category: task.category || '',
-      estimatedDuration: task.estimatedDuration?.toString() || ''
-    })
-  }
-
-  const getPriorityColor = (priority: number) => {
-    switch (priority) {
-      case 1: return 'bg-danger-100 text-danger-800 dark:bg-danger-900 dark:text-danger-100'
-      case 2: return 'bg-warning-100 text-warning-800 dark:bg-warning-900 dark:text-warning-100'
-      case 3: return 'bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-100'
-      default: return 'bg-neutral-100 text-neutral-800 dark:bg-neutral-900 dark:text-neutral-100'
-    }
-  }
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return <CheckCircle className="w-4 h-4 text-success-500" />
-      case 'in-progress':
-        return <Clock className="w-4 h-4 text-warning-500" />
-      default:
-        return <AlertCircle className="w-4 h-4 text-neutral-400" />
-    }
-  }
-
-  const getDueDateLabel = (dueDate?: string) => {
-    if (!dueDate) return 'Sin fecha'
+  const filteredTasks = tasks.filter(task => {
+    const matchesSearch = task.title.toLowerCase().includes(search.toLowerCase()) ||
+                         task.description?.toLowerCase().includes(search.toLowerCase())
     
-    const date = parseISO(dueDate)
+    const matchesFilter = filter === 'all' || 
+                         (filter === 'pending' && task.status === 'pending') ||
+                         (filter === 'completed' && task.status === 'completed') ||
+                         (filter === 'in-progress' && task.status === 'in-progress')
     
-    if (isToday(date)) return 'Hoy'
-    if (isTomorrow(date)) return 'Mañana'
-    if (isPast(date)) return 'Vencida'
-    
-    return format(date, 'dd MMM', { locale: es })
-  }
-
-  const getDueDateColor = (dueDate?: string) => {
-    if (!dueDate) return 'text-neutral-500'
-    
-    const date = parseISO(dueDate)
-    
-    if (isPast(date)) return 'text-danger-600 dark:text-danger-400'
-    if (isToday(date)) return 'text-warning-600 dark:text-warning-400'
-    if (isTomorrow(date)) return 'text-primary-600 dark:text-primary-400'
-    
-    return 'text-neutral-600 dark:text-neutral-400'
-  }
-
-  const sortedTasks = [...filteredTasks].sort((a, b) => {
-    let comparison = 0
-    
-    switch (sortBy) {
-      case 'dueDate':
-        const dateA = a.dueDate ? new Date(a.dueDate).getTime() : Infinity
-        const dateB = b.dueDate ? new Date(b.dueDate).getTime() : Infinity
-        comparison = dateA - dateB
-        break
-        
-      case 'priority':
-        comparison = a.priority - b.priority
-        break
-        
-      case 'createdAt':
-        comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        break
-    }
-    
-    return sortOrder === 'asc' ? comparison : -comparison
+    return matchesSearch && matchesFilter
   })
 
   const stats = {
     total: tasks.length,
     completed: tasks.filter(t => t.status === 'completed').length,
-    inProgress: tasks.filter(t => t.status === 'in-progress').length,
     pending: tasks.filter(t => t.status === 'pending').length,
-    overdue: tasks.filter(t => t.dueDate && isPast(parseISO(t.dueDate)) && t.status !== 'completed').length
+    inProgress: tasks.filter(t => t.status === 'in-progress').length
   }
 
   return (
@@ -252,42 +89,17 @@ const TasksPage = () => {
           </p>
         </div>
         
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="btn btn-secondary"
-          >
-            <Filter className="w-4 h-4" />
-            Filtros
-          </button>
-          
-          <div className="flex border border-neutral-200 dark:border-neutral-700 rounded-lg overflow-hidden">
-            <button
-              onClick={() => setViewMode('list')}
-              className={`p-2 ${viewMode === 'list' ? 'bg-neutral-100 dark:bg-neutral-700' : ''}`}
-            >
-              <List className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`p-2 ${viewMode === 'grid' ? 'bg-neutral-100 dark:bg-neutral-700' : ''}`}
-            >
-              <Grid className="w-4 h-4" />
-            </button>
-          </div>
-          
-          <button
-            onClick={() => setIsAddingTask(true)}
-            className="btn btn-primary"
-          >
-            <Plus className="w-4 h-4" />
-            Nueva tarea
-          </button>
-        </div>
+        <button
+          onClick={() => setIsAddingTask(true)}
+          className="btn btn-primary"
+        >
+          <Plus className="w-4 h-4" />
+          Nueva tarea
+        </button>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="card p-4">
           <div className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">
             {stats.total}
@@ -315,110 +127,108 @@ const TasksPage = () => {
           </div>
           <div className="text-sm text-neutral-500 dark:text-neutral-400">Pendientes</div>
         </div>
-        
-        <div className="card p-4">
-          <div className="text-2xl font-bold text-danger-600 dark:text-danger-400">
-            {stats.overdue}
-          </div>
-          <div className="text-sm text-neutral-500 dark:text-neutral-400">Vencidas</div>
-        </div>
       </div>
 
       {/* Filters */}
-      {showFilters && (
-        <div className="card p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-neutral-900 dark:text-neutral-100">Filtros</h3>
-            <button
-              onClick={clearFilters}
-              className="text-sm text-primary-600 dark:text-primary-400 hover:underline"
-            >
-              Limpiar filtros
-            </button>
+      <div className="card p-4">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="input pl-9"
+                placeholder="Buscar tareas..."
+              />
+            </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="w-full sm:w-48">
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="input"
+            >
+              <option value="all">Todas las tareas</option>
+              <option value="pending">Pendientes</option>
+              <option value="in-progress">En progreso</option>
+              <option value="completed">Completadas</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Add Task Modal */}
+      {isAddingTask && (
+        <div className="card p-6">
+          <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-4">
+            Nueva tarea
+          </h3>
+          
+          <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                Buscar
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                Título *
               </label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                <input
-                  type="text"
-                  value={filters.search}
-                  onChange={(e) => setFilters({ search: e.target.value })}
-                  className="input pl-9"
-                  placeholder="Buscar tareas..."
-                />
-              </div>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
-                Estado
-              </label>
-              <select
-                value={filters.status[0] || ''}
-                onChange={(e) => setFilters({ status: e.target.value ? [e.target.value] : [] })}
+              <input
+                type="text"
+                value={newTask.title}
+                onChange={(e) => setNewTask(prev => ({ ...prev, title: e.target.value }))}
                 className="input"
-              >
-                <option value="">Todos los estados</option>
-                <option value="pending">Pendiente</option>
-                <option value="in-progress">En progreso</option>
-                <option value="completed">Completada</option>
-                <option value="cancelled">Cancelada</option>
-              </select>
+                placeholder="¿Qué necesitas hacer?"
+                autoFocus
+              />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                Descripción (opcional)
+              </label>
+              <textarea
+                value={newTask.description}
+                onChange={(e) => setNewTask(prev => ({ ...prev, description: e.target.value }))}
+                className="input min-h-[100px] resize-none"
+                placeholder="Detalles de la tarea..."
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                 Prioridad
               </label>
               <select
-                value={filters.priority[0] || ''}
-                onChange={(e) => setFilters({ priority: e.target.value ? [parseInt(e.target.value)] : [] })}
+                value={newTask.priority}
+                onChange={(e) => setNewTask(prev => ({ ...prev, priority: parseInt(e.target.value) as 1 | 2 | 3 }))}
                 className="input"
               >
-                <option value="">Todas las prioridades</option>
                 <option value="1">Alta</option>
                 <option value="2">Media</option>
                 <option value="3">Baja</option>
               </select>
             </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={handleAddTask}
+                className="btn btn-primary flex-1"
+              >
+                Crear tarea
+              </button>
+              <button
+                onClick={() => setIsAddingTask(false)}
+                className="btn btn-secondary"
+              >
+                Cancelar
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Sort controls */}
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-neutral-500 dark:text-neutral-400">
-          Mostrando {sortedTasks.length} de {tasks.length} tareas
-        </div>
-        
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-neutral-500 dark:text-neutral-400">Ordenar por:</span>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
-            className="input text-sm py-1"
-          >
-            <option value="dueDate">Fecha de vencimiento</option>
-            <option value="priority">Prioridad</option>
-            <option value="createdAt">Fecha de creación</option>
-          </select>
-          
-          <button
-            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-            className="p-2 rounded-lg border border-neutral-200 dark:border-neutral-700 hover:bg-neutral-100 dark:hover:bg-neutral-700"
-          >
-            <SortAsc className={`w-4 h-4 transition-transform ${sortOrder === 'desc' ? 'rotate-180' : ''}`} />
-          </button>
-        </div>
-      </div>
-
-      {/* Tasks list/grid */}
-      {sortedTasks.length === 0 ? (
+      {/* Tasks List */}
+      {filteredTasks.length === 0 ? (
         <div className="card p-12 text-center">
           <div className="w-16 h-16 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="w-8 h-8 text-neutral-400" />
@@ -427,7 +237,7 @@ const TasksPage = () => {
             No hay tareas
           </h3>
           <p className="text-neutral-500 dark:text-neutral-400 mb-6">
-            {filters.search || filters.status.length > 0 || filters.priority.length > 0
+            {search || filter !== 'all'
               ? 'No hay tareas que coincidan con los filtros'
               : 'Comienza creando tu primera tarea'}
           </p>
@@ -439,36 +249,91 @@ const TasksPage = () => {
             Crear primera tarea
           </button>
         </div>
-      ) : viewMode === 'list' ? (
-        /* List view */
+      ) : (
         <div className="space-y-3">
-          {sortedTasks.map((task) => (
+          {filteredTasks.map((task) => (
             <div
               key={task.id}
               className="card p-4 hover:shadow-medium transition-shadow"
             >
-              <div className="flex items-start gap-4">
-                {/* Status checkbox */}
-                <button
-                  onClick={() => handleCompleteTask(task.id)}
-                  className={`mt-1 w-5 h-5 rounded-full border-2 flex-shrink-0 ${
-                    task.status === 'completed'
-                      ? 'bg-success-500 border-success-500'
-                      : 'border-neutral-300 dark:border-neutral-600 hover:border-success-500'
-                  }`}
-                >
-                  {task.status === 'completed' && (
-                    <CheckCircle className="w-4 h-4 text-white" />
-                  )}
-                </button>
-                
-                {/* Task content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <h3 className={`font-medium ${
-                        task.status === 'completed'
-                          ? 'text-neutral-400 dark:text-neutral-500 line-through'
-                          : 'text-neutral-900 dark:text-neutral-100'
+              <div className="flex items-start justify-between">
+                <div className="flex items-start gap-3">
+                  <button
+                    onClick={() => handleCompleteTask(task.id)}
+                    className={`mt-1 w-5 h-5 rounded-full border-2 flex-shrink-0 ${
+                      task.status === 'completed'
+                        ? 'bg-success-500 border-success-500'
+                        : 'border-neutral-300 dark:border-neutral-600 hover:border-success-500'
+                    }`}
+                  >
+                    {task.status === 'completed' && (
+                      <CheckCircle className="w-4 h-4 text-white" />
+                    )}
+                  </button>
+                  
+                  <div>
+                    <h3 className={`font-medium ${
+                      task.status === 'completed'
+                        ? 'text-neutral-400 dark:text-neutral-500 line-through'
+                        : 'text-neutral-900 dark:text-neutral-100'
+                    }`}>
+                      {task.title}
+                    </h3>
+                    
+                    {task.description && (
+                      <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+                        {task.description}
+                      </p>
+                    )}
+                    
+                    <div className="flex items-center gap-4 mt-2">
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        task.priority === 1
+                          ? 'bg-danger-100 text-danger-800 dark:bg-danger-900 dark:text-danger-100'
+                          : task.priority === 2
+                          ? 'bg-warning-100 text-warning-800 dark:bg-warning-900 dark:text-warning-100'
+                          : 'bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-100'
                       }`}>
-                        {task.title}
+                        {task.priority === 1 ? 'Alta' : task.priority === 2 ? 'Media' : 'Baja'}
+                      </span>
+                      
+                      <div className="flex items-center gap-1 text-sm text-neutral-500 dark:text-neutral-400">
+                        {task.status === 'completed' ? (
+                          <>
+                            <CheckCircle className="w-3 h-3" />
+                            <span>Completada</span>
+                          </>
+                        ) : task.status === 'in-progress' ? (
+                          <>
+                            <Clock className="w-3 h-3" />
+                            <span>En progreso</span>
+                          </>
+                        ) : (
+                          <>
+                            <AlertCircle className="w-3 h-3" />
+                            <span>Pendiente</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleDeleteTask(task.id)}
+                    className="p-1 text-neutral-400 hover:text-danger-600 dark:hover:text-danger-400"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default TasksPage

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { CheckCircle, Clock, TrendingUp, Award, Plus, MoreVertical } from 'lucide-react'
+import { CheckCircle, TrendingUp, Award, Plus, MoreVertical } from 'lucide-react'
 import { useTaskStore } from '../stores/taskStore'
 import { toast } from 'sonner'
 
@@ -16,7 +16,7 @@ const TodayPage = () => {
   }, [fetchTasks])
 
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null
+    let interval: any = null
     
     if (isPomodoroRunning && pomodoroTime > 0) {
       interval = setInterval(() => {

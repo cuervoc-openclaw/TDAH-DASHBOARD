@@ -196,13 +196,8 @@ class TaskService {
   }
 
   calculateDailyTaskLimit(tasks: Task[]): number {
-    const completedToday = tasks.filter(task => {
-      if (task.status !== 'completed') return false
-      
-      const completedDate = new Date(task.updatedAt)
-      const today = new Date()
-      return completedDate.toDateString() === today.toDateString()
-    }).length
+    // Simplified calculation for demo
+    const completedCount = tasks.filter(task => task.status === 'completed').length
     
     // Base limit: 5 tasks per day, adjust based on completion rate
     const baseLimit = 5
@@ -219,7 +214,7 @@ class TaskService {
     return baseLimit
   }
 
-  getTaskMotivationMessage(task: Task): string {
+  getTaskMotivationMessage(_task: Task): string {
     const messages = [
       "¡Tú puedes! Un paso a la vez.",
       "Cada tarea completada es un logro.",

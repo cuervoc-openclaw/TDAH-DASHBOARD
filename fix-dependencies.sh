@@ -25,12 +25,13 @@ if ! npm list --depth=0 2>&1 | grep -q "missing"; then
 else
     echo -e "${YELLOW}⚠️  Problemas detectados en package.json${NC}"
     
-    # Arreglar react-aria si es necesario
+    # Remover react-aria si es necesario (no lo estamos usando)
     if grep -q "react-aria" package.json; then
-        echo "Arreglando react-aria..."
-        sed -i 's/"react-aria": "[^"]*"/"@react-aria\/utils": "^3.26.0"/g' package.json
-        sed -i 's/"react-aria-components": "[^"]*"/"@react-aria\/components": "^1.7.0"/g' package.json
-        echo -e "${GREEN}✅ react-aria actualizado${NC}"
+        echo "Removiendo react-aria (no se está usando)..."
+        sed -i '/"react-aria":/d' package.json
+        sed -i '/"react-aria-components":/d' package.json
+        sed -i '/"@react-aria/d' package.json
+        echo -e "${GREEN}✅ react-aria removido${NC}"
     fi
 fi
 
