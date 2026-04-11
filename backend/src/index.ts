@@ -14,6 +14,8 @@ import authRoutes from './routes/auth.routes'
 import taskRoutes from './routes/task.routes'
 import habitRoutes from './routes/habit.routes'
 import userRoutes from './routes/user.routes'
+import pomodoroRoutes from './routes/pomodoro.routes'
+import reminderRoutes from './routes/reminder.routes'
 
 // Import middleware
 import { errorHandler } from './middlewares/errorHandler'
@@ -131,6 +133,8 @@ app.use('/api/auth', authRoutes)
 app.use('/api/tasks', authenticate, taskRoutes)
 app.use('/api/habits', authenticate, habitRoutes)
 app.use('/api/user', authenticate, userRoutes)
+app.use('/api/pomodoro', authenticate, pomodoroRoutes)
+app.use('/api/reminders', authenticate, reminderRoutes)
 
 // Error handling middleware (must be last)
 app.use(errorHandler)

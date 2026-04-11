@@ -168,3 +168,26 @@ model Session {
   
   @@map("sessions")
 }
+
+model PomodoroSession {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type      String   @default("work") // work, short-break, long-break
+  duration  Int      @default(25) // en minutos
+  completed Boolean  @default(false)
+  
+  startTime DateTime
+  endTime   DateTime?
+  
+  taskId    String?
+  task      Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  
+  notes     String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("pomodoro_sessions")
+}
