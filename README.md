@@ -30,7 +30,22 @@ Dashboard web progresivo (PWA) minimalista y altamente personalizable diseñado 
 - **PWA:** Funcionamiento offline + instalación en dispositivo
 - **Hosting:** Vercel (frontend) + Railway (backend)
 
-## 🚀 Comenzar
+## 🚀 Despliegue Rápido (Vercel) - Verlo Funcionando
+
+Para ver el proyecto funcionando inmediatamente sin configurar nada localmente:
+
+### 🔗 URL de Preview:
+**Frontend:** `https://neuroasistente-tdah.vercel.app` (una vez configurado)
+
+### Pasos para deploy en Vercel (5 minutos):
+1. **Crear cuenta** en [vercel.com](https://vercel.com) con GitHub
+2. **Importar repositorio:** `cuervoc-openclaw/TDAH-DASHBOARD`
+3. **Configurar variables** (opcional para demo):
+   - `DATABASE_URL`: `sqlite:./dev.db`
+   - `JWT_SECRET`: cualquier texto secreto
+4. **¡Listo!** Vercel desplegará automáticamente
+
+### Para desarrollo local (si quieres modificarlo):
 
 ### Prerrequisitos
 - Node.js 18+

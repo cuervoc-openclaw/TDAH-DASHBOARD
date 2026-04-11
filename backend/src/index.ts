@@ -25,6 +25,11 @@ export const prisma = new PrismaClient()
 const app = express()
 const PORT = process.env.PORT || 3001
 
+// Para Vercel, necesitamos exportar el app
+if (process.env.NODE_ENV === 'production') {
+  module.exports = app
+}
+
 // Security middleware
 app.use(helmet({
   contentSecurityPolicy: {
