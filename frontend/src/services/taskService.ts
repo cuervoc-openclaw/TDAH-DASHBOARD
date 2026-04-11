@@ -201,7 +201,7 @@ class TaskService {
     
     // Base limit: 5 tasks per day, adjust based on completion rate
     const baseLimit = 5
-    const completionRate = tasks.filter(t => t.status === 'completed').length / tasks.length
+    const completionRate = completedCount / tasks.length
     
     if (completionRate > 0.8) {
       return baseLimit + 2 // High performer
