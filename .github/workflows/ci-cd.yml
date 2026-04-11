@@ -1,0 +1,158 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch: # Ejecución manual
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+      
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+      
+      - name: Type check
+        run: |
+          cd frontend
+          npm run type-check
+      
+      - name: Lint
+        run: |
+          cd frontend
+          npm run lint
+      
+      - name: Test
+        run: |
+          cd frontend
+          npm test -- --run
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+      
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+      
+      - name: Build
+        run: |
+          cd frontend
+          npm run build
+      
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/dist
+          retention-days: 7
+
+  deploy-gh-pages:
+    runs-on: ubuntu-latest
+    needs: build-frontend
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+      
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+      
+      - name: Build for GitHub Pages
+        run: |
+          cd frontend
+          cp vite.config.github.ts vite.config.ts
+          npm run build
+      
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'frontend/dist'
+      
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+      
+      - name: Notify success
+        if: success()
+        run: |
+          echo "✅ Deploy completado: ${{ steps.deployment.outputs.page_url }}"
+          echo "🚀 NeuroAsistente TDAH está en vivo!"
+          
+          # Generar reporte para WhatsApp
+          echo "📱 Generando reporte para WhatsApp..."
+          cd ${{ github.workspace }}
+          node scripts/whatsapp-reporter.js deploy-success \
+            "${{ steps.deployment.outputs.page_url }}" \
+            "${{ github.sha }}" \
+            "${{ github.event.head_commit.message }}"
+          
+          echo "✅ Reporte generado. Configura el webhook de WhatsApp para enviar automáticamente."
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: [test, build-frontend, deploy-gh-pages]
+    if: always()
+    steps:
+      - name: Summary
+        run: |
+          echo "📊 Resumen del pipeline:"
+          echo "Test: ${{ needs.test.result }}"
+          echo "Build: ${{ needs.build-frontend.result }}"
+          echo "Deploy: ${{ needs.deploy-gh-pages.result }}"
+          
+          if [[ "${{ needs.deploy-gh-pages.result }}" == "success" ]]; then
+            echo "🎉 ¡Deploy exitoso!"
+            echo "🔗 URL: https://cuervoc-openclaw.github.io/TDAH-DASHBOARD/"
+          else
+            echo "⚠️  Revisar logs para errores"
+          fi
