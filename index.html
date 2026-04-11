@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#4f46e5" />
+    <meta name="description" content="Dashboard PWA para adultos con TDAH - NeuroAsistente" />
+    <title>NeuroAsistente TDAH</title>
+    
+    <!-- PWA manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Apple touch icon -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    
+    <!-- Preconnect to fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Accessibility meta tags -->
+    <meta name="color-scheme" content="light dark">
+    <meta name="supported-color-schemes" content="light dark">
+    <script type="module" crossorigin src="/TDAH-DASHBOARD/assets/index-DXhjvyvM.js"></script>
+    <link rel="stylesheet" crossorigin href="/TDAH-DASHBOARD/assets/index-M6Tm9oMJ.css">
+  <link rel="manifest" href="/TDAH-DASHBOARD/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/TDAH-DASHBOARD/registerSW.js"></script></head>
+  <body class="h-full bg-neutral-50 text-neutral-900 dark:bg-neutral-900 dark:text-neutral-50 transition-colors duration-200">
+    <div id="root" class="h-full"></div>
+    
+    <!-- PWA update prompt -->
+    <div id="pwa-update" class="hidden fixed bottom-4 right-4 bg-white dark:bg-neutral-800 rounded-lg shadow-hard p-4 max-w-sm border border-neutral-200 dark:border-neutral-700">
+      <div class="flex items-start gap-3">
+        <div class="flex-shrink-0">
+          <div class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
+            <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+        </div>
+        <div class="flex-1">
+          <h3 class="font-semibold text-sm mb-1">Actualización disponible</h3>
+          <p class="text-xs text-neutral-600 dark:text-neutral-400 mb-3">Hay una nueva versión de NeuroAsistente disponible.</p>
+          <div class="flex gap-2">
+            <button id="pwa-update-reload" class="px-3 py-1.5 text-xs font-medium bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors">
+              Actualizar ahora
+            </button>
+            <button id="pwa-update-dismiss" class="px-3 py-1.5 text-xs font-medium bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 rounded-md hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors">
+              Más tarde
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Reduced motion warning -->
+    <div id="reduced-motion-warning" class="hidden fixed bottom-4 left-4 bg-warning-50 dark:bg-warning-900/20 border border-warning-200 dark:border-warning-800 rounded-lg p-3 max-w-xs">
+      <div class="flex items-center gap-2">
+        <svg class="w-4 h-4 text-warning-600 dark:text-warning-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.998-.833-2.732 0L4.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+        </svg>
+        <p class="text-xs text-warning-700 dark:text-warning-300">Animaciones reducidas por preferencias del sistema.</p>
+      </div>
+    </div>
+  </body>
+</html>
