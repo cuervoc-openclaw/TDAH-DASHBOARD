@@ -15,7 +15,7 @@ const createTaskSchema = z.object({
   parentTaskId: z.string().optional(),
   dueDate: z.string().datetime().optional(),
   estimatedDuration: z.number().int().positive().optional(),
-  tags: z.array(z.string()).default([]),
+  tags: z.string().default('[]'),
   category: z.string().max(50).optional()
 })
 
@@ -237,7 +237,7 @@ router.post('/:id/chunk', async (req: AuthRequest, res) => {
             priority: existingTask.priority,
             status: 'pending',
             isChunked: false,
-            tags: existingTask.tags,
+            tags: existingTask.tags as any,
             category: existingTask.category,
             estimatedDuration: existingTask.estimatedDuration 
               ? Math.floor(existingTask.estimatedDuration / validatedData.subtasks.length)
@@ -328,7 +328,7 @@ router.get('/filter/:filter', async (req: AuthRequest, res) => {
     
     if (tag) {
       where.tags = {
-        has: tag
+        contains: tag as string
       }
     }
     

@@ -46,12 +46,19 @@ model Task {
   status      String   @default("pending") // pending, in-progress, completed, cancelled
   isChunked   Boolean  @default(false)
   timeSpent   Int      @default(0) // en minutos
+  parentTaskId String?
+  dueDate     String?  // ISO string
+  estimatedDuration Int?
+  tags        String   @default("[]") // JSON array
+  category    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
-  // Relación
+  // Relaciones
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subtasks    Task[]   @relation("TaskSubtasks")
+  parentTask  Task?    @relation("TaskSubtasks", fields: [parentTaskId], references: [id])
 }
 
 model Habit {
