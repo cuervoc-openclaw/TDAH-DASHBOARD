@@ -54,8 +54,8 @@ router.post('/register', async (req, res) => {
             theme: 'light',
             fontSize: 16,
             reduceMotion: false,
-            notificationTypes: { push: true, email: false, whatsapp: false },
-            quietHours: { start: '22:00', end: '08:00' },
+            notificationTypes: JSON.stringify({ push: true, email: false, whatsapp: false }),
+            quietHours: JSON.stringify({ start: '22:00', end: '08:00' }),
             pomodoroDuration: 25,
             breakDuration: 5,
             chunkingEnabled: true

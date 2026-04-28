@@ -15,9 +15,27 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
+  preferences Preferences?
+
   // Relaciones
   tasks     Task[]
   habits    Habit[]
+}
+
+model Preferences {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  theme     String   @default("light")
+  fontSize  Int      @default(16)
+  reduceMotion Boolean @default(false)
+  notificationTypes String @default("{\"push\":true,\"email\":false,\"whatsapp\":false}")
+  quietHours        String @default("{\"start\":\"22:00\",\"end\":\"08:00\"}")
+  pomodoroDuration  Int    @default(25)
+  breakDuration     Int    @default(5)
+  chunkingEnabled   Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Task {
