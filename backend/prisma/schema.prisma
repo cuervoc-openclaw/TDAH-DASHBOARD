@@ -4,190 +4,61 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url      = "file:./dev.db"
 }
 
 model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  name          String?
-  password      String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   
-  // Preferencias de usuario
-  preferences   UserPreferences?
-  tasks         Task[]
-  habits        Habit[]
-  reminders     Reminder[]
-  achievements  Achievement[]
-  
-  @@map("users")
-}
-
-model UserPreferences {
-  id          String   @id @default(cuid())
-  userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // Personalización visual
-  theme       String   @default("light") // light, dark, high-contrast
-  fontSize    Int      @default(16)
-  reduceMotion Boolean @default(false)
-  
-  // Preferencias de notificación
-  notificationTypes Json // { push: boolean, email: boolean, whatsapp: boolean }
-  quietHours       Json // { start: "22:00", end: "08:00" }
-  
-  // Estrategias TDAH
-  pomodoroDuration  Int    @default(25)
-  breakDuration     Int    @default(5)
-  chunkingEnabled   Boolean @default(true)
-  
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  @@map("user_preferences")
+  // Relaciones
+  tasks     Task[]
+  habits    Habit[]
 }
 
 model Task {
   id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
   title       String
   description String?
   priority    Int      @default(2) // 1: alta, 2: media, 3: baja
   status      String   @default("pending") // pending, in-progress, completed, cancelled
-  
-  // Desglose de tareas (chunking)
   isChunked   Boolean  @default(false)
-  parentTaskId String?  // Para subtareas
-  parentTask  Task?    @relation("TaskSubtasks", fields: [parentTaskId], references: [id])
-  subtasks    Task[]   @relation("TaskSubtasks")
-  
-  // Fechas
-  dueDate     DateTime?
-  estimatedDuration Int? // en minutos
-  timeSpent   Int      @default(0)
-  
-  // Categorización
-  tags        String[]
-  category    String?
-  
+  timeSpent   Int      @default(0) // en minutos
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
-  @@map("tasks")
+  // Relación
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Habit {
   id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
   name        String
   description String?
-  frequency   String   // daily, weekly, monthly
   streak      Int      @default(0)
   bestStreak  Int      @default(0)
-  
-  // Tracking
-  tracking    HabitTracking[]
-  
+  color       String   @default("blue")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
-  @@map("habits")
+  // Relación
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tracking    HabitTracking[]
 }
 
 model HabitTracking {
   id        String   @id @default(cuid())
-  habitId   String
-  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
   date      DateTime @default(now())
   completed Boolean  @default(false)
-  notes     String?
   
-  createdAt DateTime @default(now())
-  
-  @@map("habit_tracking")
+  // Relación
+  habitId   String
+  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
 }
 
-model Reminder {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  title       String
-  message     String
-  type        String   // task, habit, custom
-  relatedId   String?  // ID de tarea/hábito relacionado
-  
-  // Programación
-  schedule    Json     // { cron: "0 9 * * *", timezone: "America/Santiago" }
-  nextTrigger DateTime
-  
-  // Canales
-  channels    Json     // { push: boolean, email: boolean, whatsapp: boolean }
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  @@map("reminders")
-}
-
-model Achievement {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  type        String   // streak, task_completion, habit_milestone
-  title       String
-  description String
-  icon        String?
-  unlockedAt  DateTime @default(now())
-  
-  createdAt   DateTime @default(now())
-  
-  @@map("achievements")
-}
-
-model Session {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  token       String   @unique
-  expiresAt   DateTime
-  userAgent   String?
-  ipAddress   String?
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  @@map("sessions")
-}
-
-model PomodoroSession {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  type      String   @default("work") // work, short-break, long-break
-  duration  Int      @default(25) // en minutos
-  completed Boolean  @default(false)
-  
-  startTime DateTime
-  endTime   DateTime?
-  
-  taskId    String?
-  task      Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
-  
-  notes     String?
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  @@map("pomodoro_sessions")
-}

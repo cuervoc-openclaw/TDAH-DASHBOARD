@@ -16,6 +16,7 @@ import habitRoutes from './routes/habit.routes'
 import userRoutes from './routes/user.routes'
 import pomodoroRoutes from './routes/pomodoro.routes'
 import reminderRoutes from './routes/reminder.routes'
+import healthRoutes from './routes/health.routes'
 
 // Import middleware
 import { errorHandler } from './middlewares/errorHandler'
@@ -135,6 +136,9 @@ app.use('/api/habits', authenticate, habitRoutes)
 app.use('/api/user', authenticate, userRoutes)
 app.use('/api/pomodoro', authenticate, pomodoroRoutes)
 app.use('/api/reminders', authenticate, reminderRoutes)
+
+// Health check (sin autenticación)
+app.use(healthRoutes);
 
 // Error handling middleware (must be last)
 app.use(errorHandler)

@@ -4,7 +4,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // Configuración específica para GitHub Pages
 export default defineConfig({
-  base: '/TDAH-DASHBOARD/', // Importante para GitHub Pages
+  base: '/', // Para desarrollo local
   plugins: [
     react(),
     VitePWA({
